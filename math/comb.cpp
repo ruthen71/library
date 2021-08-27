@@ -19,6 +19,8 @@ ll modpow(ll A, ll N, ll mod) {
 }
 
 // nCr(mod)(O(r))
+// 踏んだバグ：Nが大きいとオーバーフローする
+// NUME = NUME * (N % mod) % modにする
 ll comb(ll N, ll R, ll mod) {
     if (N < 0 || R < 0 || N < R) return 0;
     // numerator/denominator
