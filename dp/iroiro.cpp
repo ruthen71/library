@@ -8,6 +8,7 @@ using namespace std;
 // C_i=A_i/A_{i+1}(比はオーバーフローしない)
 // https://atcoder.jp/contests/abc155/submissions/27855969
 // https://atcoder.jp/contests/abc231/submissions/27855892
+// ref:https://betrue12.hateblo.jp/entry/2020/02/17/020628
 long long coin_payments(vector<long long>& B, vector<long long>& C) {
     int N = B.size();
     assert(N - 1 == (int)C.size());
