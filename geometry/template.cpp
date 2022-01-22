@@ -1,6 +1,10 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// ref
+// https://ei1333.github.io/library/geometry/template.cpp
+// https://bakamono1357.hatenablog.com/entry/2020/04/29/025320
+
 // はじめに
 using Double = double;
 const Double EPS = 1e-8;
