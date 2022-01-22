@@ -77,3 +77,54 @@ int ccw(const Point &a, Point b, Point c) {
 // 2直線l1,l2が平行・垂直か判定する(それぞれ外積・内積が0)
 bool is_parallel(const Line &l1, const Line &l2) { return sign(cross(l1.b - l1.a, l2.b - l2.a)) == 0; }
 bool is_orthogonal(const Line &l1, const Line &l2) { return sign(dot(l1.b - l1.a, l2.b - l2.a)) == 0; }
+
+// 交差判定(intersection):CGL_2_B
+// 2線分s1,s2が交差するか判定する
+bool intersection_ss(const Segment &s1, const Segment &s2) { return (ccw(s1.a, s1.b, s2.a) * ccw(s1.a, s1.b, s2.b) <= 0 && ccw(s2.a, s2.b, s1.a) * ccw(s2.a, s2.b, s1.b) <= 0); }
+// 線分sと点pの場合(未verify)
+bool intersection_sp(const Segment &s, const Point &p) { return ccw(s.a, s.b, p) == ON_SEGMENT; }
+// 直線lと点pの場合(absが1でない<=>ccwがONLINE_BACKかONLINE_FRONTかON_SEGMENT)(未verify)
+bool intersection_lp(const Line &l, const Point &p) {
+    int res = ccw(l.a, l.b, p);
+    return (res == ONLINE_BACK || res == ONLINE_FRONT || res == ON_SEGMENT);
+}
+// 直線l1,l2の場合(未verify)
+bool intersection_ll(const Line &l1, const Line &l2) {
+    // cross_point_llの説明を参考に
+    Point base = l1.b - l1.a;
+    Double d12 = cross(base, l2.b - l2.a);
+    Double d1 = cross(base, l1.b - l2.a);
+    if (sign(d12) == 0 && sign(d1) == 0) return true;  // 一致
+    // 平行か1点で交わるか
+    return !is_parallel(l1, l2);
+}
+
+// 線分の交点(cross point):CGL_2_C
+// 2直線l1,l2の交点を求める(未verify)
+Point cross_point_ll(const Line &l1, const Line &l2) {
+    // 2直線の関係:1点で交わるor平行or一致
+    Point base = l1.b - l1.a;
+    Double d12 = cross(base, l2.b - l2.a);
+    Double d1 = cross(base, l1.b - l2.a);
+    // 一致(sign(d12) == 0 は is_parallelと本質的に同じ, sign(d1) == 0は重なっているか)
+    if (sign(d12) == 0 && sign(d1) == 0) return l2.a;  // 2直線が一致するので適当に点を返す
+    assert(is_parallel(l1, l2) == false);              // assert(sign(d12) != 0);と同じ
+    return l2.a + (l2.b - l2.a) * (d1 / d12);
+}
+// 2線分s1,s2の交点を求める
+Point cross_point_ss(const Segment &s1, const Segment &s2) {
+    assert(intersection_ss(s1, s2));  // 交点を持つかまず判定する
+    // 1点で交わるor無数の点で交わる
+    Point base = s1.b - s1.a;
+    Double d12 = cross(base, s2.b - s2.a);
+    Double d1 = cross(base, s1.b - s2.a);
+    if (sign(d12) == 0 && sign(d1) == 0) {
+        // 無数の点で交わる(未verify)
+        if (intersection_sp(s1, s2.a)) return s2.a;
+        if (intersection_sp(s1, s2.b)) return s2.b;
+        if (intersection_sp(s2, s1.a)) return s1.a;
+        assert(intersection_sp(s2, s1.b));
+        return s1.b;
+    }
+    return s2.a + (s2.b - s2.a) * (d1 / d12);
+}
