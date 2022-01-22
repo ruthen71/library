@@ -7,6 +7,8 @@ const Double EPS = 1e-8;
 const Double PI = acos(-1);
 inline int sign(const Double &x) { return x <= -EPS ? -1 : (x >= EPS ? 1 : 0); }
 inline bool equals(const Double &a, const Double &b) { return sign(a - b) == 0; }
+Double radian_to_degree(Double r) { return r * 180.0 / PI; }
+Double degree_to_radian(Double d) { return d * PI / 180.0; }
 
 // 点
 using Point = complex<Double>;
@@ -20,6 +22,9 @@ istream &operator>>(istream &is, Point &p) {
 }
 Double dot(const Point &a, const Point &b) { return a.real() * b.real() + a.imag() * b.imag(); }    // 内積
 Double cross(const Point &a, const Point &b) { return a.real() * b.imag() - a.imag() * b.real(); }  // 外積
+// thetaだけ反時計回りに回転させる(thetaは弧度法なので、例えば90度回転させたいときにはtheta=PI/2とする)
+// theta=degree_to_radian(90)などでも良い
+Point rotate(const Point &p, const Double &theta) { return p * Point(cos(theta), sin(theta)); }
 
 // 直線
 struct Line {
