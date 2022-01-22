@@ -8,22 +8,21 @@
 
 using namespace std;
 
-using ll = long long;
-
-vector<ll> prime_list(ll n) {
-    vector<ll> res;
-    for (ll i = 2; i*i <= n; i++) {
-        while (n%i == 0) {
+vector<long long> prime_list(long long n) {
+    vector<long long> res;
+    for (long long i = 2; i * i <= n; i++) {
+        while (n % i == 0) {
             res.push_back(i);
             n /= i;
         }
     }
-    if (n != 1ll) res.push_back(n);
+    if (n != 1) res.push_back(n);
     return res;
 }
 
 int main() {
-    long long n; cin >> n;
+    long long n;
+    cin >> n;
     vector<long long> plist = prime_list(n);
     printf("%lld:", n);
     for (auto p : plist) {
