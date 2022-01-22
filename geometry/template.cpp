@@ -81,7 +81,7 @@ bool is_orthogonal(const Line &l1, const Line &l2) { return sign(dot(l1.b - l1.a
 // 交差判定(intersection):CGL_2_B
 // 2線分s1,s2が交差するか判定する
 bool intersection_ss(const Segment &s1, const Segment &s2) { return (ccw(s1.a, s1.b, s2.a) * ccw(s1.a, s1.b, s2.b) <= 0 && ccw(s2.a, s2.b, s1.a) * ccw(s2.a, s2.b, s1.b) <= 0); }
-// 線分sと点pの場合(未verify)
+// 線分sと点pの場合(一応distance_spの実装でverify)
 bool intersection_sp(const Segment &s, const Point &p) { return ccw(s.a, s.b, p) == ON_SEGMENT; }
 // 直線lと点pの場合(absが1でない<=>ccwがONLINE_BACKかONLINE_FRONTかON_SEGMENT)(未verify)
 bool intersection_lp(const Line &l, const Point &p) {
@@ -127,4 +127,21 @@ Point cross_point_ss(const Segment &s1, const Segment &s2) {
         return s1.b;
     }
     return s2.a + (s2.b - s2.a) * (d1 / d12);
+}
+
+// 距離(distance):CGL_2_D
+// 2点a,bの距離を求める(未verify)
+Double distance_pp(const Point &a, const Point &b) { return abs(a - b); }
+// 直線lと点pの距離を求める(未verify)
+Double distance_lp(const Line &l, const Point &p) { return abs(p - projection(l, p)); }
+// 線分sと点pの距離を求める
+Double distance_sp(const Segment &s, const Point &p) {
+    Point r = projection(s, p);
+    if (intersection_sp(s, r)) return abs(r - p);
+    return min(abs(s.a - p), abs(s.b - p));
+}
+// 線分s1,s2の距離を求める
+Double distance_ss(const Segment &s1, const Segment &s2) {
+    if (intersection_ss(s1, s2)) return 0.0;
+    return min({distance_sp(s1, s2.a), distance_sp(s1, s2.b), distance_sp(s2, s1.a), distance_sp(s2, s1.b)});
 }
