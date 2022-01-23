@@ -64,7 +64,7 @@ Point projection(const Line &l, const Point &p) {
 
 // 反射(reflection):CGL_1_B
 // 直線lについて点pと線対称の点を求める
-Point reflection(const Line &l, const Point &p) { return p + (projection(l, p) - p) * 2.0; }
+Point reflection(const Line &l, const Point &p) { return p + (projection(l, p) - p) * (Double)2.0; }
 
 // 反時計回り(ccw):CGL_1_C
 // 点a,b,cの位置関係を調べる(aを基準とする)
@@ -153,4 +153,58 @@ Double distance_sp(const Segment &s, const Point &p) {
 Double distance_ss(const Segment &s1, const Segment &s2) {
     if (intersection_ss(s1, s2)) return 0.0;
     return min({distance_sp(s1, s2.a), distance_sp(s1, s2.b), distance_sp(s2, s1.a), distance_sp(s2, s1.b)});
+}
+
+// 多角形
+using Polygon = vector<Point>;
+// 面積(area):CGL_3_A
+// 多角形の面積を外積を用いて求める
+Double area(const Polygon &p) {
+    int n = (int)p.size();
+    assert(n >= 3);
+    Double ret = 0;
+    for (int i = 0; i < n - 1; i++) {
+        ret += cross(p[i], p[i + 1]);
+    }
+    ret += cross(p[n - 1], p[0]);
+    // 点が反時計回りに並んでいた場合はret>0で、時計回りに並んでいた場合はret<0
+    return abs(ret) / 2;
+}
+// 凸性判定(is-convex):CGL_3_B
+// 多角形の(広義の)凸性判定を行う(任意の内角が180度「以内」)
+// 反時計回り・時計回りどちらも動作する(はず)
+// 多角形の辺は共有する端点のみで交差することを仮定(すなわち、ccwの戻り値にONLINE_BACKとON_SEGMENTはない)
+// ちなみに上記の仮定を入れるとCGL_3_Bが通らない
+bool is_convex_polygon(const Polygon &p) {
+    int n = (int)p.size();
+    assert(n >= 3);
+    bool okccw = true, okcw = true;
+    for (int i = 0; i < n; i++) {
+        int res = ccw(p[i], p[(i + 1) % n], p[(i + 2) % n]);
+        assert(res != ONLINE_BACK);
+        assert(res != ON_SEGMENT);
+        if (res == CLOCKWISE) okccw = false;         // res != COUNTER_CLOCKWISE && res != ONLINE_FRONT
+        if (res == COUNTER_CLOCKWISE) okcw = false;  // res != CLOCKWISE && res != ONLINE_FRONT
+        if (okccw == false && okcw == false) return false;
+    }
+    return true;
+}
+// 多角形-点の包含(polygon-point containment):CGL_3_C
+// 点が多角形(凸とは限らない)に含まれるか判定する
+// 点を端点としてx軸の正の方向の半直線を考え、何回多角形の線分と交差するかで判定する
+constexpr int IN = 2;   // 多角形内
+constexpr int ON = 1;   // 多角形の周上
+constexpr int OUT = 0;  // 多角形外
+int contains(const Polygon &Q, const Point &p) {
+    bool x = false;
+    int n = (int)Q.size();
+    for (int i = 0; i < n; i++) {
+        if (intersection_sp(Segment(Q[i], Q[(i + 1) % n]), p)) return ON;
+        Point a = Q[i] - p, b = Q[(i + 1) % n] - p;
+        if (a.imag() > b.imag()) swap(a, b);
+        // 半直線が線分の端点と交差する場合などを考えると下記の式が良い(ref:螺旋本)
+        if (sign(a.imag()) <= 0 && sign(b.imag()) > 0 && sign(cross(a, b)) > 0) x = !x;
+        // うしライブラリは sign(cross(a, b)) < 0 で判定している
+    }
+    return (x ? IN : OUT);
 }
