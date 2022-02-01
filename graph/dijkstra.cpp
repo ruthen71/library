@@ -4,51 +4,52 @@
 // https://onlinejudge.u-aizu.ac.jp/status/users/ruthen71/submissions/1/GRL_1_A/judge/4939121/C++17
 // 蟻本 p97
 
-#include <iostream>
-#include <vector>
 #include <algorithm>
+#include <iostream>
 #include <queue>
+#include <vector>
 using namespace std;
 
 using ll = long long;
 
-const ll INF = 1ll<<60;
+const ll INF = 1ll << 60;
 
-vector<ll> dijkstra(vector<vector<pair<int, ll>>> &GRAPH, int V, int S) {
+vector<ll> dijkstra(vector<vector<pair<int, ll>>> &G, int S) {
+    int V = (int)G.size();
     vector<ll> dist(V, INF);
     dist[S] = 0;
     priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> que;
     que.push({0, S});
-
     while (!que.empty()) {
-        pair<ll, int> p = que.top(); que.pop();
+        auto p = que.top();
+        que.pop();
         int v = p.second;
         if (dist[v] < p.first) continue;
-        for (int i = 0; i < GRAPH[v].size(); i++) {
-            pair<int, ll> edge = GRAPH[v][i];
-            if (dist[edge.first] > dist[v] + edge.second) {
-                dist[edge.first] = dist[v] + edge.second;
-                que.push({dist[edge.first], edge.first});
+        for (auto &es : G[v]) {
+            if (dist[es.first] > dist[v] + es.second) {
+                dist[es.first] = dist[v] + es.second;
+                que.push({dist[es.first], es.first});
             }
         }
+        return dist;
     }
-    return dist;
 }
 
-
 int main() {
-    int V,E,r,s,t; cin >> V >> E >> r;
+    int V, E, r, s, t;
+    cin >> V >> E >> r;
     ll d;
     vector<vector<pair<int, ll>>> g(V);
     for (int i = 0; i < E; i++) {
         cin >> s >> t >> d;
-        g[s].push_back({t,d});
+        g[s].push_back({t, d});
     }
-    vector<ll> dist = dijkstra(g, V, r);
+    vector<ll> dist = dijkstra(g, r);
     for (int i = 0; i < V; i++) {
-        if (dist[i] != INF) printf("%lld\n", dist[i]);
-        else puts("INF");
+        if (dist[i] != INF)
+            printf("%lld\n", dist[i]);
+        else
+            puts("INF");
     }
     return 0;
 }
-
