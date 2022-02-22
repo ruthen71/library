@@ -89,16 +89,16 @@ bool is_orthogonal(const Line &l1, const Line &l2) { return sign(dot(l1.b - l1.a
 
 // 交差判定(intersection):CGL_2_B
 // 2線分s1,s2が交差するか判定する
-bool intersection_ss(const Segment &s1, const Segment &s2) { return (ccw(s1.a, s1.b, s2.a) * ccw(s1.a, s1.b, s2.b) <= 0 && ccw(s2.a, s2.b, s1.a) * ccw(s2.a, s2.b, s1.b) <= 0); }
+bool is_intersect_ss(const Segment &s1, const Segment &s2) { return (ccw(s1.a, s1.b, s2.a) * ccw(s1.a, s1.b, s2.b) <= 0 && ccw(s2.a, s2.b, s1.a) * ccw(s2.a, s2.b, s1.b) <= 0); }
 // 線分sと点pの場合(distance_sp,containsでverify)
-bool intersection_sp(const Segment &s, const Point &p) { return ccw(s.a, s.b, p) == ON_SEGMENT; }
+bool is_intersect_sp(const Segment &s, const Point &p) { return ccw(s.a, s.b, p) == ON_SEGMENT; }
 // 直線lと点pの場合(absが1でない<=>ccwがONLINE_BACKかONLINE_FRONTかON_SEGMENT)(未verify)
-bool intersection_lp(const Line &l, const Point &p) {
+bool is_intersect_lp(const Line &l, const Point &p) {
     int res = ccw(l.a, l.b, p);
     return (res == ONLINE_BACK || res == ONLINE_FRONT || res == ON_SEGMENT);
 }
 // 直線l1,l2の場合(未verify)
-bool intersection_ll(const Line &l1, const Line &l2) {
+bool is_intersect_ll(const Line &l1, const Line &l2) {
     // cross_point_llの説明を参考に
     Point base = l1.b - l1.a;
     Double d12 = cross(base, l2.b - l2.a);
@@ -122,36 +122,36 @@ Point cross_point_ll(const Line &l1, const Line &l2) {
 }
 // 2線分s1,s2の交点を求める
 Point cross_point_ss(const Segment &s1, const Segment &s2) {
-    assert(intersection_ss(s1, s2));  // 交点を持つかまず判定する
+    assert(is_intersect_ss(s1, s2));  // 交点を持つかまず判定する
     // 1点で交わるor無数の点で交わる
     Point base = s1.b - s1.a;
     Double d12 = cross(base, s2.b - s2.a);
     Double d1 = cross(base, s1.b - s2.a);
     if (sign(d12) == 0 && sign(d1) == 0) {
         // 無数の点で交わる場合はそのうち1つの点を返す(未verify)
-        if (intersection_sp(s1, s2.a)) return s2.a;
-        if (intersection_sp(s1, s2.b)) return s2.b;
-        if (intersection_sp(s2, s1.a)) return s1.a;
-        assert(intersection_sp(s2, s1.b));
+        if (is_intersect_sp(s1, s2.a)) return s2.a;
+        if (is_intersect_sp(s1, s2.b)) return s2.b;
+        if (is_intersect_sp(s2, s1.a)) return s1.a;
+        assert(is_intersect_sp(s2, s1.b));
         return s1.b;
     }
     return s2.a + (s2.b - s2.a) * (d1 / d12);
 }
 
 // 距離(distance):CGL_2_D
-// 2点a,bの距離を求める
+// 2点a,bの距離を求める(未verify)
 Double distance_pp(const Point &a, const Point &b) { return abs(a - b); }
 // 直線lと点pの距離を求める(未verify)
 Double distance_lp(const Line &l, const Point &p) { return distance_pp(p, projection(l, p)); }
 // 線分sと点pの距離を求める
 Double distance_sp(const Segment &s, const Point &p) {
     Point r = projection(s, p);
-    if (intersection_sp(s, r)) return distance_pp(r, p);
+    if (is_intersect_sp(s, r)) return distance_pp(r, p);
     return min(distance_pp(s.a, p), distance_pp(s.b, p));
 }
 // 線分s1,s2の距離を求める
 Double distance_ss(const Segment &s1, const Segment &s2) {
-    if (intersection_ss(s1, s2)) return 0.0;
+    if (is_intersect_ss(s1, s2)) return 0.0;
     return min({distance_sp(s1, s2.a), distance_sp(s1, s2.b), distance_sp(s2, s1.a), distance_sp(s2, s1.b)});
 }
 
@@ -199,7 +199,7 @@ int contains(const Polygon &Q, const Point &p) {
     bool x = false;
     int n = (int)Q.size();
     for (int i = 0; i < n; i++) {
-        if (intersection_sp(Segment(Q[i], Q[(i + 1) % n]), p)) return ON;
+        if (is_intersect_sp(Segment(Q[i], Q[(i + 1) % n]), p)) return ON;
         Point a = Q[i] - p, b = Q[(i + 1) % n] - p;
         if (a.imag() > b.imag()) swap(a, b);
         // 半直線が線分の端点と交差する場合などを考えると下記の式が良い(ref:螺旋本)
