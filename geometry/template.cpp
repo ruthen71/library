@@ -90,7 +90,7 @@ bool is_orthogonal(const Line &l1, const Line &l2) { return sign(dot(l1.b - l1.a
 // 交差判定(intersection):CGL_2_B
 // 2線分s1,s2が交差するか判定する
 bool intersection_ss(const Segment &s1, const Segment &s2) { return (ccw(s1.a, s1.b, s2.a) * ccw(s1.a, s1.b, s2.b) <= 0 && ccw(s2.a, s2.b, s1.a) * ccw(s2.a, s2.b, s1.b) <= 0); }
-// 線分sと点pの場合(一応distance_spの実装でverify)
+// 線分sと点pの場合(distance_sp,containsでverify)
 bool intersection_sp(const Segment &s, const Point &p) { return ccw(s.a, s.b, p) == ON_SEGMENT; }
 // 直線lと点pの場合(absが1でない<=>ccwがONLINE_BACKかONLINE_FRONTかON_SEGMENT)(未verify)
 bool intersection_lp(const Line &l, const Point &p) {
@@ -128,7 +128,7 @@ Point cross_point_ss(const Segment &s1, const Segment &s2) {
     Double d12 = cross(base, s2.b - s2.a);
     Double d1 = cross(base, s1.b - s2.a);
     if (sign(d12) == 0 && sign(d1) == 0) {
-        // 無数の点で交わる(未verify)
+        // 無数の点で交わる場合はそのうち1つの点を返す(未verify)
         if (intersection_sp(s1, s2.a)) return s2.a;
         if (intersection_sp(s1, s2.b)) return s2.b;
         if (intersection_sp(s2, s1.a)) return s1.a;
@@ -139,15 +139,15 @@ Point cross_point_ss(const Segment &s1, const Segment &s2) {
 }
 
 // 距離(distance):CGL_2_D
-// 2点a,bの距離を求める(未verify)
+// 2点a,bの距離を求める
 Double distance_pp(const Point &a, const Point &b) { return abs(a - b); }
 // 直線lと点pの距離を求める(未verify)
-Double distance_lp(const Line &l, const Point &p) { return abs(p - projection(l, p)); }
+Double distance_lp(const Line &l, const Point &p) { return distance_pp(p, projection(l, p)); }
 // 線分sと点pの距離を求める
 Double distance_sp(const Segment &s, const Point &p) {
     Point r = projection(s, p);
-    if (intersection_sp(s, r)) return abs(r - p);
-    return min(abs(s.a - p), abs(s.b - p));
+    if (intersection_sp(s, r)) return distance_pp(r, p);
+    return min(distance_pp(s.a, p), distance_pp(s.b, p));
 }
 // 線分s1,s2の距離を求める
 Double distance_ss(const Segment &s1, const Segment &s2) {
@@ -174,7 +174,7 @@ Double area(const Polygon &p) {
 // 多角形の(広義の)凸性判定を行う(任意の内角が180度「以内」)
 // 反時計回り・時計回りどちらも動作する(はず)
 // 多角形の辺は共有する端点のみで交差することを仮定(すなわち、ccwの戻り値にONLINE_BACKとON_SEGMENTはない)
-// ちなみに上記の仮定を入れるとCGL_3_Bが通らない
+// ちなみに上記の仮定を入れるとCGL_3_Bが通らない(テストケースに不備がある)
 bool is_convex_polygon(const Polygon &p) {
     int n = (int)p.size();
     assert(n >= 3);
