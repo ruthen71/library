@@ -3,9 +3,7 @@
 // AOJ NTL_1_A Prime Factorize
 // https://onlinejudge.u-aizu.ac.jp/status/users/ruthen71/submissions/1/NTL_1_A/judge/4983987/C++17
 
-#include <iostream>
-#include <vector>
-
+#include <bits/stdc++.h>
 using namespace std;
 
 vector<long long> prime_list(long long n) {
@@ -17,6 +15,30 @@ vector<long long> prime_list(long long n) {
         }
     }
     if (n != 1) res.push_back(n);
+    return res;
+}
+
+vector<long long> prime_list_uq(long long n) {
+    vector<long long> res;
+    for (long long i = 2; i * i <= n; i++) {
+        if (n % i == 0) {
+            res.push_back(i);
+            while (n % i == 0) n /= i;
+        }
+    }
+    if (n != 1) res.push_back(n);
+    return res;
+}
+
+map<long long, int> prime_map(long long n) {
+    map<long long, int> res;
+    for (long long i = 2; i * i <= n; i++) {
+        while (n % i == 0) {
+            res[i]++;
+            n /= i;
+        }
+    }
+    if (n != 1) res[n]++;
     return res;
 }
 
