@@ -2,6 +2,8 @@
 // verified
 // AOJ GRL_1_A Single Source Shortest Path
 // https://onlinejudge.u-aizu.ac.jp/status/users/ruthen71/submissions/1/GRL_1_A/judge/4939121/C++17
+// https://onlinejudge.u-aizu.ac.jp/status/users/ruthen71/submissions/1/GRL_1_A/judge/6364308/C++14
+// https://onlinejudge.u-aizu.ac.jp/status/users/ruthen71/submissions/1/GRL_1_A/judge/6436631/C++17
 // 蟻本 p97
 
 #include <algorithm>
@@ -10,30 +12,28 @@
 #include <vector>
 using namespace std;
 
-using ll = long long;
-
-const ll INF = 1ll << 60;
-
-vector<ll> dijkstra(vector<vector<pair<int, ll>>> &G, int S) {
+template <class T> vector<T> dijkstra(vector<vector<pair<int, T>>> &G, int S) {
     int V = (int)G.size();
-    vector<ll> dist(V, INF);
+    const T INF = numeric_limits<T>::max();
+    vector<T> dist(V, INF);
     dist[S] = 0;
-    priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> que;
+    priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> que;
     que.push({0, S});
     while (!que.empty()) {
-        auto p = que.top();
+        auto [d, v] = que.top();
         que.pop();
-        int v = p.second;
-        if (dist[v] < p.first) continue;
-        for (auto &es : G[v]) {
-            if (dist[es.first] > dist[v] + es.second) {
-                dist[es.first] = dist[v] + es.second;
-                que.push({dist[es.first], es.first});
+        if (dist[v] != d) continue;  // dist[v] < d
+        for (auto &[nex, cost] : G[v]) {
+            if (dist[nex] > d + cost) {
+                dist[nex] = d + cost;
+                que.push({dist[nex], nex});
             }
         }
-        return dist;
     }
+    return dist;
 }
+
+using ll = long long;
 
 int main() {
     int V, E, r, s, t;
@@ -44,9 +44,9 @@ int main() {
         cin >> s >> t >> d;
         g[s].push_back({t, d});
     }
-    vector<ll> dist = dijkstra(g, r);
+    vector<ll> dist = dijkstra<ll>(g, r);
     for (int i = 0; i < V; i++) {
-        if (dist[i] != INF)
+        if (dist[i] != numeric_limits<ll>::max())
             printf("%lld\n", dist[i]);
         else
             puts("INF");
