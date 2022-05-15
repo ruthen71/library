@@ -35,6 +35,7 @@ vector<int> topological_sort(vector<vector<int>> &G) {
     return res;
 }
 
+// 使用例:https://codeforces.com/contest/1679/submission/157182603
 int dag_longest_path_length(vector<vector<int>> &g, vector<int> &topo) {
     if (topo.size() != g.size()) return -1;
     int n = (int)g.size();
