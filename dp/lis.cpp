@@ -1,22 +1,38 @@
 // LIS(最長増加部分列問題)
 // https://atcoder.jp/contests/chokudai_S001/submissions/19508576
-
+// https://onlinejudge.u-aizu.ac.jp/status/users/ruthen71/submissions/1/DPL_1_D/judge/6609197/C++17
 
 #include <bits/stdc++.h>
 using namespace std;
 
-using ll = long long int;
-#define rep(i,n) for (ll i = 0; i < (n); i++)
-#define all(v) (v).begin(), (v).end()
-const int INF = 1001001001;
+template <class T> int longest_increasing_subsequence(const vector<T> &A, bool strict) {
+    // strict = true ... A[i] < A[i+1]
+    // strict = false ... A[i] <= A[i+1]
+    int N = (int)A.size();
+    const T INF = numeric_limits<T>::max();
+    vector<T> dp(N, INF);
+    // dp配列中にA[i]があったときに、どの値を書き換えるかを考えるとlower/upperを区別できる
+    // strictなのでその値
+    // strictではないのでその次の値
+    if (strict) {
+        for (int i = 0; i < N; i++) {
+            *lower_bound(dp.begin(), dp.end(), A[i]) = A[i];
+        }
+    } else {
+        for (int i = 0; i < N; i++) {
+            *upper_bound(dp.begin(), dp.end(), A[i]) = A[i];
+        }
+    }
+    return lower_bound(dp.begin(), dp.end(), INF) - dp.begin();
+}
 
 int main() {
-    int n; cin >> n;
-    vector<int> a(n); rep(i,n) cin >> a[i];
-    vector<int> dp(n, INF);
-    rep(i,n) {
-        *lower_bound(all(dp), a[i]) = a[i];
-    }
-    cout << lower_bound(all(dp), INF)-dp.begin() << endl;
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N;
+    cin >> N;
+    vector<int> A(N);
+    for (int i = 0; i < N; i++) cin >> A[i];
+    cout << longest_increasing_subsequence<int>(A, true) << '\n';
     return 0;
 }
