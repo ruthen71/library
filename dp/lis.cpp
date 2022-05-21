@@ -6,21 +6,18 @@
 using namespace std;
 
 template <class T> int longest_increasing_subsequence(const vector<T> &A, bool strict) {
-    // strict = true ... A[i] < A[i+1]
-    // strict = false ... A[i] <= A[i+1]
+    // strict = true ... A[i] < A[i+1], false ... A[i] <= A[i+1]
     int N = (int)A.size();
     const T INF = numeric_limits<T>::max();
     vector<T> dp(N, INF);
     // dp配列中にA[i]があったときに、どの値を書き換えるかを考えるとlower/upperを区別できる
-    // strictなのでその値
-    // strictではないのでその次の値
     if (strict) {
         for (int i = 0; i < N; i++) {
-            *lower_bound(dp.begin(), dp.end(), A[i]) = A[i];
+            *lower_bound(dp.begin(), dp.end(), A[i]) = A[i];  // strictなのでその値
         }
     } else {
         for (int i = 0; i < N; i++) {
-            *upper_bound(dp.begin(), dp.end(), A[i]) = A[i];
+            *upper_bound(dp.begin(), dp.end(), A[i]) = A[i];  // strictではないのでその次の値
         }
     }
     return lower_bound(dp.begin(), dp.end(), INF) - dp.begin();
