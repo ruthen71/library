@@ -13,9 +13,9 @@
 using namespace std;
 
 template <class T> vector<T> dijkstra(vector<vector<pair<int, T>>> &G, int S) {
-    int V = (int)G.size();
+    int N = (int)G.size();
     const T INF = numeric_limits<T>::max();
-    vector<T> dist(V, INF);
+    vector<T> dist(N, INF);
     dist[S] = 0;
     priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> que;
     que.push({0, S});
@@ -33,23 +33,33 @@ template <class T> vector<T> dijkstra(vector<vector<pair<int, T>>> &G, int S) {
     return dist;
 }
 
-using ll = long long;
-
-int main() {
-    int V, E, r, s, t;
-    cin >> V >> E >> r;
-    ll d;
-    vector<vector<pair<int, ll>>> g(V);
-    for (int i = 0; i < E; i++) {
-        cin >> s >> t >> d;
-        g[s].push_back({t, d});
+// dijkstra で求めた最短経路上で使われる辺の集合の1つを返す(全域木)
+// ある頂点への最短経路が2つ以上ある場合、いずれかの経路に含まれる辺の1本を返す
+// problem : https://atcoder.jp/contests/abc252/submissions/31883605
+template <class T> vector<tuple<int, int, T>> dijkstra_tree(vector<vector<pair<int, T>>> &G, int S) {
+    int N = (int)G.size();
+    const T INF = numeric_limits<T>::max();
+    vector<T> dist(N, INF);
+    dist[S] = 0;
+    vector<int> prev(N, -1);
+    vector<tuple<int, int, T>> res;
+    priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> que;
+    que.push({0, S});
+    while (!que.empty()) {
+        auto [d, v] = que.top();
+        que.pop();
+        if (dist[v] != d) continue;  // dist[v] < d
+        if (prev[v] != -1) {
+            // add edge (prev[v] -> v)
+            res.push_back({prev[v], v, dist[v] - dist[prev[v]]});
+        }
+        for (auto &[nex, cost] : G[v]) {
+            if (dist[nex] > d + cost) {
+                dist[nex] = d + cost;
+                prev[nex] = v;
+                que.push({dist[nex], nex});
+            }
+        }
     }
-    vector<ll> dist = dijkstra<ll>(g, r);
-    for (int i = 0; i < V; i++) {
-        if (dist[i] != numeric_limits<ll>::max())
-            printf("%lld\n", dist[i]);
-        else
-            puts("INF");
-    }
-    return 0;
+    return res;
 }
