@@ -47,6 +47,19 @@ int dag_longest_path_length(vector<vector<int>> &g, vector<int> &topo) {
     }
     return *max_element(dp.begin(), dp.end());
 }
+// shortest は dp を INF で初期化して max を min にすれば良いはず
+// 多分こう↓
+int dag_shortest_path_length(vector<vector<int>> &g, vector<int> &topo) {
+    if (topo.size() != g.size()) return -1;
+    int n = (int)g.size();
+    vector<int> dp(n, 1 << 30);
+    for (int &v : topo) {
+        for (int &nx : g[v]) {
+            dp[nx] = min(dp[nx], dp[v] + 1);
+        }
+    }
+    return *min_element(dp.begin(), dp.end());
+}
 
 int main() {
     int n, m;
