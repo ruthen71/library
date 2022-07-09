@@ -1,9 +1,9 @@
-#include <bits/stdc++.h>
-using namespace std;
-
 // ref
 // https://ei1333.github.io/library/geometry/template.cpp
 // https://bakamono1357.hatenablog.com/entry/2020/04/29/025320
+
+#include <bits/stdc++.h>
+using namespace std;
 
 // はじめに
 using Double = double;
@@ -16,8 +16,6 @@ Double degree_to_radian(Double d) { return d * PI / 180.0; }
 
 // 点
 using Point = complex<Double>;
-// Point operator*(const Point &p, const Double &d) { return Point(p.real() * d, p.imag() * d); }  // 定数を掛ける
-// Point operator/(const Point &p, const Double &d) { return Point(p.real() / d, p.imag() / d); }  // 定数で割る
 istream &operator>>(istream &is, Point &p) {
     Double x, y;
     is >> x >> y;
@@ -26,25 +24,33 @@ istream &operator>>(istream &is, Point &p) {
 }
 Double dot(const Point &a, const Point &b) { return a.real() * b.real() + a.imag() * b.imag(); }    // 内積
 Double cross(const Point &a, const Point &b) { return a.real() * b.imag() - a.imag() * b.real(); }  // 外積
-// thetaだけ反時計回りに回転させる(thetaは弧度法なので、例えば90度回転させたいときにはtheta=PI/2とする)
-// theta=degree_to_radian(90)などでも良い
 Point rotate(const Point &p, const Double &theta) { return p * Point(cos(theta), sin(theta)); }
+// usage: rotate(P, PI/2) ... 時計回りに90度回転
+// usage: rotate(P, degree_to_radian(90)) ... 同上
 
 // 直線
 struct Line {
     Point a, b;
     Line() = default;
     Line(Point a, Point b) : a(a), b(b) {}
+    Line(Double A, Double B, Double C) {
+        // Ax + By = C
+        if (equals(A, 0)) {
+            a = Point(0, C / B), b = Point(1, C / B);
+        } else if (equals(B, 0)) {
+            a = Point(C / A, 0), b = Point(C / A, 1);
+        } else {
+            a = Point(0, C / B), b = Point(C / A, 0);
+        }
+    }
     friend ostream &operator<<(ostream &os, const Line &p) { return os << p.a << "->" << p.b; }
     friend istream &operator>>(istream &is, Line &p) { return is >> p.a >> p.b; }
 };
-
 // 線分
 struct Segment : Line {
     Segment() = default;
     Segment(Point a, Point b) : Line(a, b) {}
 };
-
 // 円
 struct Circle {
     Point o;
@@ -99,7 +105,7 @@ bool is_intersect_lp(const Line &l, const Point &p) {
 }
 // 直線l1,l2の場合(未verify)
 bool is_intersect_ll(const Line &l1, const Line &l2) {
-    // cross_point_llの説明を参考に
+    // cross_point_llの説明を参考にしてください
     Point base = l1.b - l1.a;
     Double d12 = cross(base, l2.b - l2.a);
     Double d1 = cross(base, l1.b - l2.a);
@@ -107,6 +113,20 @@ bool is_intersect_ll(const Line &l1, const Line &l2) {
     // 平行か1点で交わるか
     return !is_parallel(l1, l2);
 }
+
+// 円と円
+// 接戦の本数を返す(0は一方がもう一方の内部にある,1~3が交差,4は共にもう一方の外部にある)
+int is_intersect_cc(Circle c1, Circle c2) {
+    if (c1.r < c2.r) swap(c1, c2);
+    Double d = abs(c1.o - c2.o);
+    if (c1.r + c2.r < d) return 4;
+    if (equals(c1.r + c2.r, d)) return 3;
+    if (c1.r - c2.r < d) return 2;
+    if (equals(c1.r - c2.r, d)) return 1;
+    return 0;
+}
+// 円と点
+bool is_intersect_cp(const Circle &c, const Point &p) { return equals(abs(p - c.o), c.r); }
 
 // 線分の交点(cross point):CGL_2_C
 // 2直線l1,l2の交点を求める(未verify)
